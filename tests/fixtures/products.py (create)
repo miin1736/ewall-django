@@ -1,0 +1,7 @@
+def create_product_fixture():
+    return {
+        "id": 1,
+        "name": "Sample Product",
+        "price": 9.99,
+        "description": "This is a sample product for testing purposes."
+    }

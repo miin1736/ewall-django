@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% load seo_tags %}
+    
+    <!-- SEO Meta Tags -->
+    {% if meta %}
+        {% render_meta_tags meta %}
+    {% else %}
+        <title>{% block title %}E-wall - 아웃도어 이월 특가{% endblock %}</title>
+        <meta name="description" content="아웃도어 브랜드 이월 상품 최저가 검색">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="E-wall">
+    {% endif %}
+    
+    <!-- Schema.org Structured Data -->
+    {% if schemas %}
+        {% render_structured_data schemas %}
+    {% endif %}
+    
+    {% block meta %}{% endblock %}
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% load static %}
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="text-2xl font-bold text-blue-600">E-wall</a>
+                <div class="space-x-6">
+                    <a href="/" class="text-gray-700 hover:text-blue-600">홈</a>
+                    <a href="/admin/" class="text-gray-700 hover:text-blue-600">관리자</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Layout with Sidebar -->
+    <div class="flex min-h-screen">
+        <!-- 왼쪽 사이드바 (전역) - 모바일에서는 숨김 처리 -->
+        <aside id="globalSidebar" class="hidden lg:block w-64 bg-white border-r border-gray-200 fixed top-16 h-[calc(100vh-4rem)] overflow-y-auto z-40">
+            <div class="p-4">
+                <!-- 모바일 닫기 버튼 (모바일에서만 표시) -->
+                <button id="closeSidebarBtn" class="lg:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                
+                <!-- 브랜드 검색 -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-3">브랜드</h3>
+                    <input type="text" 
+                           id="globalBrandSearch" 
+                           placeholder="브랜드 검색..." 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    
+                    <!-- 브랜드 리스트 -->
+                    <div id="globalBrandList" class="mt-3 space-y-1 max-h-64 overflow-y-auto">
+                        {% for brand_item in all_brands %}
+                        <a href="/brand/{{ brand_item.slug }}/" 
+                           class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded transition">
+                            {{ brand_item.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- 카테고리 -->
+                <div>
+                    <h3 class="font-bold text-lg mb-3">카테고리</h3>
+                    <div class="space-y-1">
+                        {% for category_item in all_categories %}
+                        <a href="/category/{{ category_item.slug }}/" 
+                           class="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition">
+                            {{ category_item.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 모바일 오버레이 (사이드바 열렸을 때 배경) -->
+        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"></div>
+
+        <!-- 모바일 햄버거 메뉴 버튼 -->
+        <button id="globalMobileMenuBtn" class="lg:hidden fixed top-20 left-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <main class="flex-1 lg:ml-64 w-full">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white lg:ml-64">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center">
+                <p>&copy; 2025 E-wall. All rights reserved.</p>
+                <p class="text-sm text-gray-400 mt-2">제휴 마케팅 플랫폼 - 쿠팡 파트너스 활동으로 수수료를 받을 수 있습니다.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // 전역 브랜드 검색 필터링
+    document.getElementById('globalBrandSearch')?.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const brandLinks = document.querySelectorAll('#globalBrandList a');
+        
+        brandLinks.forEach(link => {
+            const brandName = link.textContent.toLowerCase();
+            if (brandName.includes(searchTerm)) {
+                link.style.display = 'block';
+            } else {
+                link.style.display = 'none';
+            }
+        });
+    });
+    
+    // 모바일 사이드바 토글
+    const mobileMenuBtn = document.getElementById('globalMobileMenuBtn');
+    const sidebar = document.getElementById('globalSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    
+    function openSidebar() {
+        sidebar.classList.remove('hidden');
+        sidebar.classList.add('block');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // 스크롤 방지
+    }
+    
+    function closeSidebar() {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('block');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = ''; // 스크롤 복구
+    }
+    
+    mobileMenuBtn?.addEventListener('click', openSidebar);
+    closeSidebarBtn?.addEventListener('click', closeSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+    
+    // 사이드바 링크 클릭 시 모바일에서 닫기
+    if (window.innerWidth < 1024) {
+        const sidebarLinks = sidebar?.querySelectorAll('a');
+        sidebarLinks?.forEach(link => {
+            link.addEventListener('click', () => {
+                setTimeout(closeSidebar, 100);
+            });
+        });
+    }
+    </script>
+</body>
+</html>

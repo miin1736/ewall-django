@@ -1,0 +1,32 @@
+import pytest
+
+@pytest.fixture(scope='session')
+def db_connection():
+    # Set up database connection
+    connection = create_db_connection()
+    yield connection
+    # Teardown database connection
+    connection.close()
+
+@pytest.fixture
+def sample_product():
+    return {
+        'name': 'Sample Product',
+        'price': 10.99,
+        'quantity': 100
+    }
+
+@pytest.fixture
+def sample_user():
+    return {
+        'username': 'testuser',
+        'email': 'testuser@example.com',
+        'password': 'securepassword'
+    }
+
+@pytest.fixture
+def sample_alert():
+    return {
+        'message': 'Test alert',
+        'level': 'info'
+    }

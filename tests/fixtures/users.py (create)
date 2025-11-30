@@ -1,0 +1,6 @@
+def create_user_fixture():
+    return {
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "password": "securepassword"
+    }

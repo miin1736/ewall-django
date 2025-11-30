@@ -1,0 +1,49 @@
+# Core Django
+Django==5.0
+djangorestframework==3.14
+django-filter==23.5
+django-redis==5.4
+
+# Database
+psycopg2-binary==2.9.10
+dj-database-url==2.1
+
+# Celery
+celery==5.3
+redis==5.0
+
+# HTTP Requests (for crawlers)
+requests==2.31.0
+
+# Validation
+pydantic==2.5
+
+# Logging
+python-json-logger==2.0
+
+# Security
+django-cors-headers==4.3
+django-ratelimit==4.1
+
+# Development
+django-debug-toolbar==4.2
+
+# SEO
+django-meta==2.3
+
+# Environment
+python-dotenv==1.0
+
+# Utilities
+Pillow==10.1
+
+# AI/ML Dependencies
+torch==2.9.1
+torchvision==0.24.1
+faiss-cpu==1.13.0
+numpy==2.3.5
+huggingface_hub>=0.20.0
+
+# WSGI Server
+gunicorn==21.2
+whitenoise==6.6

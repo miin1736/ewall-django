@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+logs/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Documentation
+*.md
+docs/
+
+# Test and coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Backup files
+*.bak
+*.backup
+data_backup.json
+build.log
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+
+# Environment files
+.env.development
+.env.example
+
+# Automation scripts (Windows specific)
+*.bat
+test_automation.py
+AUTOMATION_GUIDE.md
+start_automation.bat
+stop_automation.bat

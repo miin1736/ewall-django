@@ -1,0 +1,17 @@
+from pytest import fixture
+
+@fixture(scope='session')
+def setup_database():
+    pass
+
+@fixture(scope='session')
+def setup_products():
+    pass
+
+@fixture(scope='session')
+def setup_alerts():
+    pass
+
+@fixture(scope='session')
+def setup_users():
+    pass

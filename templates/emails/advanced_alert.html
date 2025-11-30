@@ -1,0 +1,415 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .alert-type {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .alert-type.price-drop {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .alert-type.restock {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .alert-type.trend {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .product-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .product-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+        .product-info {
+            padding: 20px;
+        }
+        .product-brand {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .product-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        .price-section {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .price-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .price {
+            font-size: 28px;
+            color: #dc2626;
+            font-weight: bold;
+        }
+        .original-price {
+            font-size: 16px;
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+        .discount-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .trend-info {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+        .trend-info h4 {
+            margin: 0 0 8px 0;
+            color: #92400e;
+            font-size: 14px;
+        }
+        .trend-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #78350f;
+        }
+        .price-chart {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .price-chart h4 {
+            margin: 0 0 16px 0;
+            font-size: 14px;
+            color: #374151;
+        }
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 100px;
+            margin-bottom: 8px;
+        }
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px 4px 0 0;
+            margin: 0 4px;
+            position: relative;
+        }
+        .chart-labels {
+            display: flex;
+            justify-content: space-around;
+            font-size: 11px;
+            color: #6b7280;
+        }
+        .product-details {
+            margin: 16px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .detail-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .detail-value {
+            font-size: 14px;
+            color: #111827;
+            font-weight: 500;
+        }
+        .button {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 16px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .secondary-button {
+            display: block;
+            background: white;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+            text-align: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 12px;
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .footer-links {
+            margin: 16px 0;
+        }
+        .footer-links a {
+            color: #6b7280;
+            text-decoration: none;
+            margin: 0 12px;
+            font-size: 13px;
+        }
+        .footer-text {
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+        .personalized-message {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .personalized-message p {
+            margin: 0;
+            color: #1e40af;
+            font-size: 14px;
+        }
+        @media only screen and (max-width: 600px) {
+            .price {
+                font-size: 24px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ alert_emoji }} {{ alert_title }}</h1>
+            <p>{{ alert_subtitle }}</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Alert Type Badge -->
+            <span class="alert-type {{ alert.reason }}">
+                {% if alert.reason == 'price_drop' %}
+                    💰 가격 하락 알림
+                {% elif alert.reason == 'restock' %}
+                    📦 재입고 알림
+                {% elif alert.reason == 'trend_alert' %}
+                    📊 추세 알림
+                {% else %}
+                    🔔 알림
+                {% endif %}
+            </span>
+            
+            <!-- Personalized Message -->
+            {% if personalized_message %}
+            <div class="personalized-message">
+                <p>{{ personalized_message }}</p>
+            </div>
+            {% endif %}
+            
+            <!-- Product Card -->
+            <div class="product-card">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.title }}" class="product-image">
+                {% endif %}
+                
+                <div class="product-info">
+                    <div class="product-brand">{{ product.brand|default:"브랜드" }}</div>
+                    <div class="product-title">{{ product.title }}</div>
+                    
+                    <!-- Price Section -->
+                    <div class="price-section">
+                        <div class="price-row">
+                            <span class="price-label">현재 가격</span>
+                            <span class="price">{{ product.price|floatformat:0|intcomma }}원</span>
+                        </div>
+                        {% if product.original_price and product.original_price > product.price %}
+                        <div class="price-row">
+                            <span class="price-label">정상 가격</span>
+                            <span class="original-price">{{ product.original_price|floatformat:0|intcomma }}원</span>
+                        </div>
+                        {% endif %}
+                        {% if product.discount_rate and product.discount_rate > 0 %}
+                        <div class="price-row">
+                            <span class="price-label">할인율</span>
+                            <span class="discount-badge">{{ product.discount_rate|floatformat:0 }}% 할인</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Price Trend Info (if provided) -->
+                    {% if trend_info %}
+                    <div class="trend-info">
+                        <h4>📈 가격 추세 정보</h4>
+                        <div class="trend-stats">
+                            <div>
+                                <strong>7일 평균:</strong> {{ trend_info.avg_price|floatformat:0|intcomma }}원
+                            </div>
+                            <div>
+                                <strong>변동률:</strong> 
+                                <span style="color: {% if trend_info.price_change_percent < 0 %}#dc2626{% else %}#059669{% endif %};">
+                                    {{ trend_info.price_change_percent|floatformat:1 }}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Price Chart (if price_history provided) -->
+                    {% if price_history %}
+                    <div class="price-chart">
+                        <h4>최근 7일 가격 변동</h4>
+                        <div class="chart-bars">
+                            {% for day, price in price_history %}
+                            <div class="chart-bar" style="height: {{ price.percentage }}%;"></div>
+                            {% endfor %}
+                        </div>
+                        <div class="chart-labels">
+                            {% for day, price in price_history %}
+                            <div>{{ day }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Product Details -->
+                    {% if product_details %}
+                    <div class="product-details">
+                        {% for detail in product_details %}
+                        <div class="detail-row">
+                            <span class="detail-label">{{ detail.label }}</span>
+                            <span class="detail-value">{{ detail.value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- CTA Buttons -->
+                    <a href="{{ product.deeplink }}{% if tracking_params %}?{{ tracking_params }}{% endif %}" class="button">
+                        🛒 지금 구매하기
+                    </a>
+                    
+                    <a href="{{ view_details_url }}" class="secondary-button">
+                        📋 상세 정보 보기
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Additional Info -->
+            <p style="color: #6b7280; font-size: 14px; line-height: 1.8; margin-top: 24px;">
+                {% if alert.reason == 'price_drop' %}
+                    🎯 설정하신 알림 조건과 일치하는 상품입니다.<br>
+                    ⏰ 가격이 다시 오를 수 있으니 빠른 결정을 권장드립니다.
+                {% elif alert.reason == 'restock' %}
+                    ✅ 품절되었던 상품이 다시 입고되었습니다.<br>
+                    ⚡ 재고가 제한적일 수 있으니 서둘러 확인하세요!
+                {% else %}
+                    💡 관심 상품에 변동사항이 발생했습니다.<br>
+                    🔍 자세한 내용을 확인해보세요.
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-links">
+                <a href="{{ manage_alerts_url }}">알림 관리</a> · 
+                <a href="{{ unsubscribe_url }}">수신 거부</a> · 
+                <a href="{{ help_url }}">고객센터</a>
+            </div>
+            <div class="footer-text">
+                <p>이 이메일은 E-wall 가격 알림 서비스에서 발송되었습니다.</p>
+                <p>{{ alert.email }}님께서 {{ alert.brand }} {{ alert.category }} 알림을 설정하셨습니다.</p>
+                <p style="margin-top: 8px;">
+                    &copy; 2025 E-wall. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

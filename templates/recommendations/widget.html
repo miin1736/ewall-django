@@ -1,0 +1,31 @@
+<!-- Recommendation Widget Template -->
+{% load static %}
+
+<div class="recommendations-section">
+    <h2 class="recommendations-title">{{ title|default:"추천 상품" }}</h2>
+    <div id="{{ container_id|default:'recommendations-grid' }}" class="recommendations-grid">
+        <!-- 추천 상품이 여기에 로드됩니다 -->
+        <div class="loading">로딩 중...</div>
+    </div>
+</div>
+
+<script src="{% static 'js/recommendations.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/recommendations.css' %}">
+
+<script>
+    // 추천 상품 자동 로드
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = '{{ container_id|default:"recommendations-grid" }}';
+        const recommendationType = '{{ recommendation_type|default:"personalized" }}';
+        const productId = '{{ product_id }}';
+        const category = '{{ category }}';
+        
+        if (recommendationType === 'product' && productId) {
+            loadRecommendations(productId, container);
+        } else if (recommendationType === 'trending') {
+            loadTrendingProducts(container);
+        } else {
+            loadPersonalizedRecommendations(container, category || null);
+        }
+    });
+</script>

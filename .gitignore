@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
+logs/
+*.pot
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+coverage.xml
+*.cover
+
+# Temporary/Debug files (루트 디렉터리)
+/test_*.py
+/debug_*.py
+/*.jpg
+/*.png
+/check_*.py
+/cleanup_*.py
+/fix_*.py
+/reclassify_*.py
+*.ini
+*_temp.py
+*_backup.py
+*_backup.json
+
+# Old shell scripts
+server_control.bat
+start_automation.bat
+stop_automation.bat
+run_*.ps1
+setup.ps1
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Database
+*.sql
+*.sqlite
+
+# Uploads
+/uploads

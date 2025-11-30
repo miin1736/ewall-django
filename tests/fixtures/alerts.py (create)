@@ -1,0 +1,7 @@
+def alert_fixture():
+    return {
+        "id": 1,
+        "message": "Test alert",
+        "level": "info",
+        "timestamp": "2023-01-01T00:00:00Z"
+    }

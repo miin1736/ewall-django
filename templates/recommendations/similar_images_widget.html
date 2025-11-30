@@ -1,0 +1,35 @@
+{% load static %}
+
+<!-- Similar Images Recommendation Widget -->
+<div class="similar-images-section">
+    <h2>{{ title|default:"이런 질감은 어떠세요?" }}</h2>
+    <p class="subtitle">{{ subtitle|default:"AI가 찾아낸 비슷한 느낌의 상품" }}</p>
+    
+    <div id="{{ container_id|default:'similar-images-container' }}" 
+         data-category="{{ category|default:'' }}"
+         data-limit="{{ limit|default:10 }}">
+        <!-- Content will be loaded by JavaScript -->
+    </div>
+</div>
+
+<!-- Required CSS -->
+<link rel="stylesheet" href="{% static 'css/similar_images.css' %}">
+
+<!-- Required JavaScript -->
+<script src="{% static 'js/similar_images.js' %}"></script>
+
+<!-- Optional: Manual initialization -->
+{% if product_id %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const widget = new SimilarImagesWidget({
+        productId: '{{ product_id }}',
+        containerId: '{{ container_id|default:"similar-images-container" }}',
+        category: '{{ category|default:"" }}',
+        limit: {{ limit|default:10 }},
+        minSimilarity: {{ min_similarity|default:0.5 }}
+    });
+    widget.init();
+});
+</script>
+{% endif %}

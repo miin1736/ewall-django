@@ -1,0 +1,100 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ewall_test
+          POSTGRES_USER: ewall
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements/testing.txt
+      
+      - name: Run migrations
+        env:
+          DB_NAME: ewall_test
+          DB_USER: ewall
+          DB_PASSWORD: password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+        run: |
+          python manage.py migrate --noinput
+      
+      - name: Run tests
+        env:
+          DB_NAME: ewall_test
+          DB_USER: ewall
+          DB_PASSWORD: password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest --cov=apps --cov-report=xml --cov-report=html
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+      
+      - name: Lint with flake8
+        run: |
+          flake8 apps config --max-line-length=120 --exclude=migrations
+  
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build Docker image
+        run: |
+          docker build -t ewall:latest .
+      
+      - name: Test Docker image
+        run: |
+          docker run --rm ewall:latest python manage.py check

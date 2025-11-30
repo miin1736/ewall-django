@@ -1,0 +1,20 @@
+# AI/ML Dependencies for Image Similarity and Texture Generation
+
+# PyTorch (CPU version for production)
+torch==2.9.1
+torchvision==0.24.1
+
+# Faiss for vector similarity search
+faiss-cpu==1.13.0
+
+# NumPy for numerical operations
+numpy==2.3.5
+
+# Hugging Face Inference Providers for text-to-image generation
+huggingface_hub>=0.20.0
+
+# PIL/Pillow (already in base.txt, but ensuring compatibility)
+# Pillow==10.1
+
+# Image processing and HTTP requests (already in base.txt)
+# requests==2.31.0

@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}E-wall - 아웃도어 이월 특가 플랫폼{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50">
+    <!-- 메인 콘텐츠 -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+            
+            <!-- 상단: 신상품 슬라이드쇼 -->
+            <section class="mb-12">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold">🆕 인기 브랜드 신상품</h2>
+                    <div class="flex gap-2">
+                        <button id="prevSlide" class="p-2 bg-white border rounded-lg hover:bg-gray-50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button id="nextSlide" class="p-2 bg-white border rounded-lg hover:bg-gray-50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative overflow-hidden bg-white rounded-lg shadow-lg" style="height: 400px;">
+                    <div id="slideContainer" class="flex transition-transform duration-500 ease-in-out h-full">
+                        {% for product in new_arrivals %}
+                        <div class="min-w-full h-full flex items-center justify-center p-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                                <div class="flex items-center justify-center">
+                                    <img src="{{ product.image_url }}" 
+                                         alt="{{ product.title }}" 
+                                         class="max-h-80 object-contain rounded-lg">
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <span class="text-sm text-blue-600 font-semibold mb-2">{{ product.brand.name }}</span>
+                                    <h3 class="text-2xl font-bold mb-4">{{ product.title }}</h3>
+                                    <div class="flex items-end gap-3 mb-4">
+                                        <span class="text-3xl font-bold text-red-600">
+                                            {{ product.price|floatformat:0|intcomma }}원
+                                        </span>
+                                        {% if product.discount_rate > 0 %}
+                                        <span class="text-xl text-gray-500 line-through">
+                                            {{ product.original_price|floatformat:0|intcomma }}원
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    {% if product.discount_rate > 0 %}
+                                    <p class="text-lg text-green-600 font-bold mb-6">
+                                        🎉 {{ product.discount_rate }}% 할인
+                                    </p>
+                                    {% endif %}
+                                    <div class="flex gap-3">
+                                        <a href="{% url 'product-detail' product.id %}" 
+                                           class="flex-1 bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 font-semibold">
+                                            상세보기
+                                        </a>
+                                        <a href="/api/out/?productId={{ product.id }}&subId=home-new" 
+                                           target="_blank"
+                                           class="flex-1 bg-gray-800 text-white text-center py-3 rounded-lg hover:bg-gray-900 font-semibold">
+                                            구매하기
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 슬라이드 인디케이터 -->
+                <div class="flex justify-center gap-2 mt-4">
+                    {% for product in new_arrivals %}
+                    <button class="slide-indicator w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-500" data-index="{{ forloop.counter0 }}"></button>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- 중단: 최근 일주일 인기 검색 상품 -->
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold mb-6">🔥 일주일간 인기 상품</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% for product in popular_products %}
+                    <div class="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition">
+                        <a href="{% url 'product-detail' product.id %}">
+                            <img src="{{ product.image_url }}" 
+                                 alt="{{ product.title }}" 
+                                 class="w-full h-48 object-cover">
+                        </a>
+                        <div class="p-4">
+                            <p class="text-xs text-gray-500 mb-1">{{ product.brand.name }}</p>
+                            <a href="{% url 'product-detail' product.id %}">
+                                <h3 class="font-semibold text-sm mb-2 line-clamp-2 hover:text-blue-600">
+                                    {{ product.title }}
+                                </h3>
+                            </a>
+                            <div class="flex items-end gap-2 mb-2">
+                                <span class="text-lg font-bold text-red-600">
+                                    {{ product.price|floatformat:0|intcomma }}원
+                                </span>
+                                {% if product.discount_rate > 0 %}
+                                <span class="text-xs text-gray-500 line-through">
+                                    {{ product.original_price|floatformat:0|intcomma }}원
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% if product.discount_rate > 0 %}
+                            <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
+                                {{ product.discount_rate }}% 할인
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        아직 인기 상품 데이터가 없습니다.
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- 하단: 70% 이상 대할인 상품 -->
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold mb-6">💰 특가 SALE (70% 이상 할인)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {% for product in mega_deals %}
+                    <div class="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition relative">
+                        <!-- 할인율 뱃지 -->
+                        <div class="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-full font-bold text-sm z-10">
+                            {{ product.discount_rate }}%
+                        </div>
+                        
+                        <a href="{% url 'product-detail' product.id %}">
+                            <img src="{{ product.image_url }}" 
+                                 alt="{{ product.title }}" 
+                                 class="w-full h-40 object-cover">
+                        </a>
+                        <div class="p-3">
+                            <p class="text-xs text-gray-500 mb-1">{{ product.brand.name }}</p>
+                            <a href="{% url 'product-detail' product.id %}">
+                                <h3 class="font-semibold text-xs mb-2 line-clamp-2 hover:text-blue-600">
+                                    {{ product.title }}
+                                </h3>
+                            </a>
+                            <div class="mb-1">
+                                <span class="text-sm text-gray-400 line-through">
+                                    {{ product.original_price|floatformat:0|intcomma }}원
+                                </span>
+                            </div>
+                            <span class="text-lg font-bold text-red-600">
+                                {{ product.price|floatformat:0|intcomma }}원
+                            </span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        현재 70% 이상 할인 상품이 없습니다.
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<script>
+// 슬라이드쇼
+let currentSlide = 0;
+const slides = document.querySelectorAll('#slideContainer > div');
+const totalSlides = slides.length;
+const indicators = document.querySelectorAll('.slide-indicator');
+
+function updateSlide(index) {
+    currentSlide = (index + totalSlides) % totalSlides;
+    document.getElementById('slideContainer').style.transform = `translateX(-${currentSlide * 100}%)`;
+    
+    indicators.forEach((ind, i) => {
+        if (i === currentSlide) {
+            ind.classList.add('bg-blue-600');
+            ind.classList.remove('bg-gray-300');
+        } else {
+            ind.classList.remove('bg-blue-600');
+            ind.classList.add('bg-gray-300');
+        }
+    });
+}
+
+document.getElementById('prevSlide').addEventListener('click', () => updateSlide(currentSlide - 1));
+document.getElementById('nextSlide').addEventListener('click', () => updateSlide(currentSlide + 1));
+
+indicators.forEach((ind, i) => {
+    ind.addEventListener('click', () => updateSlide(i));
+});
+
+// 자동 슬라이드
+setInterval(() => updateSlide(currentSlide + 1), 5000);
+</script>
+{% endblock %}

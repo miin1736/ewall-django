@@ -1,0 +1,33 @@
+# E-wall 프로덕션 배포 필수 패키지
+
+# Django Core
+Django>=5.0,<5.1
+python-dotenv>=1.0.0
+
+# Database
+psycopg2-binary>=2.9.9
+dj-database-url>=2.1.0
+
+# Cache & Queue
+redis>=5.0.1
+django-redis>=5.4.0
+celery>=5.3.4
+
+# API
+djangorestframework>=3.14.0
+django-filter>=23.5
+django-cors-headers>=4.3.1
+
+# Server
+gunicorn>=21.2.0
+whitenoise>=6.6.0
+
+# Monitoring
+sentry-sdk>=1.39.0
+
+# Utils
+Pillow>=10.1.0
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+lxml>=4.9.3
+pytz>=2023.3

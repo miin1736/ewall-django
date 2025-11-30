@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{# SEO 메타 태그는 base.html에서 처리 #}
+
+{% block content %}
+<div class="bg-white">
+    <!-- 브랜드 헤더 -->
+    <div class="border-b">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">
+                        {% if view_type == 'brand' %}
+                            {{ brand.name }}
+                        {% elif view_type == 'category' %}
+                            {{ category.name }}
+                        {% else %}
+                            {{ brand.name }} - {{ category.name }}
+                        {% endif %}
+                    </h1>
+                    <p class="text-sm text-gray-500">
+                        {% if brand %}{{ brand.name }} 공식 온라인 스토어{% endif %}
+                    </p>
+                </div>
+                
+                <!-- 검색 -->
+                <form method="get" class="flex gap-2">
+                    <input type="text" name="search" value="{{ search_query }}" 
+                           placeholder="상품 검색" 
+                           class="border border-gray-300 rounded px-4 py-2 w-64 focus:outline-none focus:border-black">
+                    <button type="submit" class="bg-black text-white px-6 py-2 rounded hover:bg-gray-800">
+                        검색
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 카테고리 탭 (브랜드가 있을 때) -->
+    {% if brand %}
+    <div class="border-b bg-white sticky top-0 z-10">
+        <div class="container mx-auto px-4">
+            <div class="flex gap-6 overflow-x-auto">
+                <a href="/brand/{{ brand.slug }}/" 
+                   onclick="clearFilters(event, '/brand/{{ brand.slug }}/')"
+                   class="py-4 px-2 border-b-2 {% if view_type == 'brand' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    전체
+                </a>
+                <a href="/{{ brand.slug }}/down/" 
+                   onclick="clearFilters(event, '/{{ brand.slug }}/down/')"
+                   class="py-4 px-2 border-b-2 {% if category.slug == 'down' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    다운
+                </a>
+                <a href="/{{ brand.slug }}/coat/" 
+                   onclick="clearFilters(event, '/{{ brand.slug }}/coat/')"
+                   class="py-4 px-2 border-b-2 {% if category.slug == 'coat' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    코트
+                </a>
+                <a href="/{{ brand.slug }}/jeans/" 
+                   onclick="clearFilters(event, '/{{ brand.slug }}/jeans/')"
+                   class="py-4 px-2 border-b-2 {% if category.slug == 'jeans' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    청바지
+                </a>
+                <a href="/{{ brand.slug }}/slacks/" 
+                   onclick="clearFilters(event, '/{{ brand.slug }}/slacks/')"
+                   class="py-4 px-2 border-b-2 {% if category.slug == 'slacks' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    슬랙스
+                </a>
+                <a href="/{{ brand.slug }}/crewneck/" 
+                   onclick="clearFilters(event, '/{{ brand.slug }}/crewneck/')"
+                   class="py-4 px-2 border-b-2 {% if category.slug == 'crewneck' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    크루넥
+                </a>
+                <a href="/{{ brand.slug }}/long-sleeve/" 
+                   onclick="clearFilters(event, '/{{ brand.slug }}/long-sleeve/')"
+                   class="py-4 px-2 border-b-2 {% if category.slug == 'long-sleeve' %}border-black font-bold{% else %}border-transparent text-gray-600 hover:text-black{% endif %} whitespace-nowrap">
+                    긴팔
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="container mx-auto px-4 py-6">
+        <!-- 필터 및 정렬 바 -->
+        <div class="flex items-center justify-between mb-6 pb-4 border-b">
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600">
+                    <strong class="text-black">{{ total }}</strong>개의 상품
+                </span>
+                
+                <!-- 정렬 옵션 -->
+                <select name="sort" onchange="updateSort(this.value)" 
+                        class="text-sm border-0 focus:outline-none focus:ring-0 cursor-pointer">
+                    <option value="discount" {% if sort == 'discount' %}selected{% endif %}>할인율순</option>
+                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>신상품순</option>
+                    <option value="popular" {% if sort == 'popular' %}selected{% endif %}>인기순</option>
+                    <option value="price-low" {% if sort == 'price-low' %}selected{% endif %}>낮은가격순</option>
+                    <option value="price-high" {% if sort == 'price-high' %}selected{% endif %}>높은가격순</option>
+                </select>
+            </div>
+            
+            <!-- 필터 토글 버튼 -->
+            <button onclick="toggleFilter()" id="filterBtn" 
+                    class="text-sm px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                <span>필터</span>
+                <svg class="inline w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- 필터 패널 (숨김/표시 토글) -->
+        <div id="filterPanel" class="hidden mb-6 p-6 bg-gray-50 rounded-lg">
+            <form method="get" id="filter-form">
+                <!-- 카테고리 뷰일 때 브랜드 필터 추가 -->
+                {% if view_type == 'category' and available_brands %}
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-3">브랜드</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-48 overflow-y-auto border border-gray-200 rounded p-3 bg-white">
+                        {% for brand_item in available_brands %}
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <input type="checkbox" name="brands" value="{{ brand_item.slug }}" 
+                                   {% if brand_item.slug in filters.brands %}checked{% endif %}
+                                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700">{{ brand_item.name }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <!-- 가격 필터 -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">가격</label>
+                        <div class="flex gap-2">
+                            <input type="number" name="priceMin" value="{{ filters.priceMin }}" 
+                                   placeholder="최소" 
+                                   class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            <span class="self-center">~</span>
+                            <input type="number" name="priceMax" value="{{ filters.priceMax }}" 
+                                   placeholder="최대" 
+                                   class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    
+                    <!-- 할인율 필터 -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">할인율</label>
+                        <select name="discountMin" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="">전체</option>
+                            <option value="10" {% if filters.discountMin == '10' %}selected{% endif %}>10% 이상</option>
+                            <option value="20" {% if filters.discountMin == '20' %}selected{% endif %}>20% 이상</option>
+                            <option value="30" {% if filters.discountMin == '30' %}selected{% endif %}>30% 이상</option>
+                            <option value="50" {% if filters.discountMin == '50' %}selected{% endif %}>50% 이상</option>
+                            <option value="70" {% if filters.discountMin == '70' %}selected{% endif %}>70% 이상</option>
+                        </select>
+                    </div>
+                    
+                    {% if category and category.slug == 'down' %}
+                    <!-- 다운 전용 필터 -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">다운비율</label>
+                        <select name="downRatio" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="">전체</option>
+                            <option value="90-10" {% if filters.downRatio == '90-10' %}selected{% endif %}>90/10</option>
+                            <option value="80-20" {% if filters.downRatio == '80-20' %}selected{% endif %}>80/20</option>
+                            <option value="70-30" {% if filters.downRatio == '70-30' %}selected{% endif %}>70/30</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">필파워</label>
+                        <input type="number" name="fillPowerMin" value="{{ filters.fillPowerMin }}" 
+                               placeholder="최소 필파워" 
+                               class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                    </div>
+                    {% elif category and category.slug == 'slacks' %}
+                    <!-- 슬랙스 전용 필터 -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">허리</label>
+                        <select name="waistType" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="">전체</option>
+                            <option value="high" {% if filters.waistType == 'high' %}selected{% endif %}>하이</option>
+                            <option value="mid" {% if filters.waistType == 'mid' %}selected{% endif %}>미드</option>
+                            <option value="low" {% if filters.waistType == 'low' %}selected{% endif %}>로우</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">밑단</label>
+                        <select name="legOpening" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="">전체</option>
+                            <option value="tapered" {% if filters.legOpening == 'tapered' %}selected{% endif %}>테이퍼드</option>
+                            <option value="straight" {% if filters.legOpening == 'straight' %}selected{% endif %}>스트레이트</option>
+                            <option value="wide" {% if filters.legOpening == 'wide' %}selected{% endif %}>와이드</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="flex gap-2 justify-end">
+                    <a href="?" class="px-6 py-2 border border-gray-300 rounded text-sm hover:bg-white">
+                        초기화
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-black text-white rounded text-sm hover:bg-gray-800">
+                        적용
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 상품 그리드 -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {% for product in products %}
+            <div class="group">
+                <!-- 상품 이미지 -->
+                <a href="{% url 'product-detail' product.id %}" class="block mb-2">
+                    <div class="relative aspect-square overflow-hidden bg-gray-100 rounded">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" 
+                             alt="{{ product.title }}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             loading="lazy"
+                             onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="text-gray-400 text-sm">이미지 없음</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- 할인율 뱃지 -->
+                        {% if product.discount_rate > 0 %}
+                        <div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                            {{ product.discount_rate }}%
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+                
+                <!-- 브랜드명 -->
+                <a href="/brand/{{ product.brand.slug }}/" class="block text-xs text-gray-600 mb-1 hover:underline">
+                    {{ product.brand.name }}
+                </a>
+                
+                <!-- 상품명 -->
+                <a href="{% url 'product-detail' product.id %}" class="block mb-2">
+                    <h3 class="text-sm font-medium line-clamp-2 group-hover:underline">
+                        {{ product.title }}
+                    </h3>
+                </a>
+                
+                <!-- 가격 정보 -->
+                <div class="mb-2">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-base font-bold">
+                            {{ product.price|floatformat:0|intcomma }}원
+                        </span>
+                    </div>
+                    {% if product.discount_rate > 0 %}
+                    <div class="text-xs text-gray-400 line-through">
+                        {{ product.original_price|floatformat:0|intcomma }}원
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- 속성 뱃지 -->
+                {% if product.down_ratio or product.fill_power or product.fit %}
+                <div class="flex flex-wrap gap-1">
+                    {% if product.down_ratio %}
+                    <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                        {{ product.down_ratio }}
+                    </span>
+                    {% endif %}
+                    {% if product.fill_power %}
+                    <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                        {{ product.fill_power }}FP
+                    </span>
+                    {% endif %}
+                    {% if product.fit %}
+                    <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                        {{ product.fit }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20 text-gray-500">
+                <p class="text-lg">상품이 없습니다.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- 페이지네이션 -->
+        {% if total_pages > 1 %}
+        <div class="mt-12 flex justify-center items-center gap-1">
+            {% if page > 1 %}
+            <a href="?page={{ page|add:'-1' }}{% if filters.brands %}{% for b in filters.brands %}&brands={{ b }}{% endfor %}{% endif %}{% for key, value in filters.items %}{% if key != 'brands' %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+               class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50">
+                ‹
+            </a>
+            {% endif %}
+            
+            {% for p in page_range %}
+                {% if p == page %}
+                    <span class="w-8 h-8 flex items-center justify-center bg-black text-white rounded font-semibold">
+                        {{ p }}
+                    </span>
+                {% elif p == '...' %}
+                    <span class="w-8 h-8 flex items-center justify-center">{{ p }}</span>
+                {% else %}
+                    <a href="?page={{ p }}{% if filters.brands %}{% for b in filters.brands %}&brands={{ b }}{% endfor %}{% endif %}{% for key, value in filters.items %}{% if key != 'brands' %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                       class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50">
+                        {{ p }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page < total_pages %}
+            <a href="?page={{ page|add:'1' }}{% if filters.brands %}{% for b in filters.brands %}&brands={{ b }}{% endfor %}{% endif %}{% for key, value in filters.items %}{% if key != 'brands' %}&{{ key }}={{ value }}{% endif %}{% endfor %}{% if sort %}&sort={{ sort }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+               class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50">
+                ›
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// 페이지 로드 전에 함수 정의
+window.clearFilters = function(event, url) {
+    if (event) {
+        event.preventDefault();
+    }
+    // 필터 파라미터 없이 순수한 URL로 이동
+    window.location.href = url;
+};
+
+// 필터 토글
+window.toggleFilter = function() {
+    const panel = document.getElementById('filterPanel');
+    if (panel) {
+        panel.classList.toggle('hidden');
+    }
+};
+
+// 정렬 변경
+window.updateSort = function(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', value);
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+};
+</script>
+
+{% endblock %}
